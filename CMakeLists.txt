@@ -90,4 +90,4 @@ endforeach()
 #
 install(TARGETS g4hybrid DESTINATION bin)
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "-W -Wall -pedantic -Wno-non-virtual-dtor -Wno-long-long -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -pipe -std=c++11")
+set(CMAKE_CXX_FLAGS "-W -Wall -pedantic -Wno-non-virtual-dtor -Wno-long-long -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-variadic-macros -pipe -std=c++14")
