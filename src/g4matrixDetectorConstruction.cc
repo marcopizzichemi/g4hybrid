@@ -938,163 +938,713 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
   // LYSO and Plastic
   // std::vector<Element_t> element;
 
-  // full box (the crystal)
 
-  G4Box *crystal_box = new G4Box("crystal_box",                     // box name
-                                    3.0/2.0,                              // half dimension on x
-                                    3.0/2.0,                         // half dimension on y
-                                    15.0/2.0);                        // half dimension on z
-  //
-  G4LogicalVolume *crystal_log = new G4LogicalVolume(crystal_box,       // shape element
-                                                     airThinLayer,      // material
-                                                     "crystal_log",     // name
-                                                     0,                 // field manager
-                                                     0,                 // sensitive detector
-                                                     0);                // user limits
-  //
-
-  // double element air box
-  G4Box *double_air_box = new G4Box("double_air_box",                     // box name
-                                    0.5/2.0,                              // half dimension on x
-                                    3.0/2.0,                         // half dimension on y
-                                    15.0/2.0);                        // half dimension on z
-  //
-  G4LogicalVolume *double_air_log = new G4LogicalVolume(double_air_box,       // shape element
-                                                        airThinLayer,         // material
-                                                        "double_air_log",     // name
-                                                        0,                    // field manager
-                                                        0,                    // sensitive detector
-                                                        0);                   // user limits
-  //
-
-
-
-  // LYSO
-  G4Box *plate_lyso_box = new G4Box("plate_lyso_box",                     // box name
-                                    0.24/2.0,                              // half dimension on x
-                                    3.0/2.0,                         // half dimension on y
-                                    15.0/2.0);                        // half dimension on z
-
-  G4LogicalVolume *plate_lyso_log = new G4LogicalVolume(plate_lyso_box,       // shape element
-                                                        LYSO,         // material
-                                                        "plate_lyso_log",     // name
-                                                        0,                    // field manager
-                                                        0,                    // sensitive detector
-                                                        0);                   // user limits
-  G4VisAttributes* plate_lyso_vis = new G4VisAttributes(G4Colour::Yellow());        // yellow
-  plate_lyso_log->SetVisAttributes(plate_lyso_vis);                                 // set vis color
-
-
-  // Plastic
-  G4Box *plate_plastic_box = new G4Box("plate_plastic_box",                     // box name
-                                    0.24/2.0,                              // half dimension on x
-                                    3.0/2.0,                         // half dimension on y
-                                    15.0/2.0);                        // half dimension on z
-
-  G4LogicalVolume *plate_plastic_log = new G4LogicalVolume(plate_plastic_box,       // shape element
-                                                        MyMaterials::Plastic(),         // material
-                                                        "plate_plastic_log",     // name
-                                                        0,                    // field manager
-                                                        0,                    // sensitive detector
-                                                        0);                   // user limits
-  G4VisAttributes* plate_plastic_vis = new G4VisAttributes(G4Colour::Cyan());        // yellow
-  plate_plastic_log->SetVisAttributes(plate_plastic_vis);                                 // set vis color
-
-  //
-  //
   float cry_x[4] = {-4.8,-1.6,+1.6,+4.8};
   float cry_y[4] = {-4.8,-1.6,+1.6,+4.8};
+  // prepare arrays of pointers
+  // esr
+  G4Box           *esr_box[4][4];
+  G4LogicalVolume *esr_log[4][4];
+  G4PVPlacement   *esr_phys[4][4];
+  // crystals
+  G4Box           *crystal_box[4][4];
+  G4LogicalVolume *crystal_log[4][4];
+  G4PVPlacement   *crystal_phys[4][4];
+  // double layers
+  G4Box           *double_box[4][4][6];
+  G4LogicalVolume *double_log[4][4][6];
+  G4PVPlacement   *double_phys[4][4][6];
+  // lyso plates
+  G4Box           *lyso_box[4][4][6];
+  G4LogicalVolume *lyso_log[4][4][6];
+  G4PVPlacement   *lyso_phys[4][4][6];
+  // plastic plates
+  G4Box           *plastic_box[4][4][6];
+  G4LogicalVolume *plastic_log[4][4][6];
+  G4PVPlacement   *plastic_phys[4][4][6];
+  // depo lyso surfs
+  G4OpticalSurface*        depo_lyso[4][4][6][2];
+  G4LogicalBorderSurface*  depo_lyso_log[4][4][6][2];
+  // depo plastic surfs
+  G4OpticalSurface*        depo_plastic[4][4][6][2];
+  G4LogicalBorderSurface*  depo_plastic_log[4][4][6][2];
+  // real depo lyso surfs
+  G4OpticalSurface*        real_depo_lyso[4][4][6][4];
+  G4LogicalBorderSurface*  real_depo_lyso_log[4][4][6][4];
+  // real depo plastic surfs
+  G4OpticalSurface*        real_depo_plastic[4][4][6][4];
+  G4LogicalBorderSurface*  real_depo_plastic_log[4][4][6][4];
 
-  for(int iCry = 0; iCry < 4 ; iCry++)
+
+  for(int iCry = 0; iCry < 4 ; iCry++) // create crystals
   {
-    for(int jCry = 0; jCry < 4 ; jCry++)
+    for(int jCry = 0; jCry < 4 ; jCry++) // create crystals
     {
-      std::stringstream cryname;
-      cryname << "cry_" << iCry << "_" << jCry;
 
+      std::stringstream sname;
+
+      //-----------------------------//
+      // ESR                         //
+      //-----------------------------//
+      //box
+      sname.str("");
+      sname << "box_esr_" << iCry << "_" << jCry;
+      esr_box[iCry][jCry] = new G4Box(sname.str().c_str(),  // box name
+                                          3.2/2.0,              // half dimension on x
+                                          3.2/2.0,              // half dimension on y
+                                          15.0/2.0);            // half dimension on z
+      //log
+      sname.str("");
+      sname << "log_esr_" << iCry << "_" << jCry;
+      esr_log[iCry][jCry] = new G4LogicalVolume(esr_box[iCry][jCry], // shape element
+                                                    airThinLayer,      // material
+                                                    sname.str().c_str(),     // name
+                                                    0,                 // field manager
+                                                    0,                 // sensitive detector
+                                                    0);                // user limits
+      //
+      esr_log[iCry][jCry]-> SetVisAttributes(G4VisAttributes(G4Colour::Magenta()));
+      //phys
       float x_c = cry_x[iCry];
       float y_c = cry_y[jCry];
+      sname.str("");
+      sname << "esr_" << iCry << "_" << jCry;
+      esr_phys[iCry][jCry] = new G4PVPlacement(0,       // rotation wrt mother volume
+                                 G4ThreeVector(x_c,y_c,0),  // translation wrt mother
+                                 esr_log[iCry][jCry],   // associated logical volume
+                                 sname.str().c_str(),     // name
+                                 expHall_log,               // associated mother log
+                                 false,                     // not used,set to false
+                                 0,                         // copy number
+                                 fCheckOverlaps);           // if true, check overlaps
 
-      new G4PVPlacement(0,                 // rotation wrt mother volume
-                        G4ThreeVector(x_c,
-                                      y_c,
-                                      0),   // translation wrt mother
-                        crystal_log,     // associated logical volume
-                        cryname.str().c_str(),  // name
-                        expHall_log,        // associated mother log
-                        false,              // not used,set to false
-                        0,                  // copy number
-                        fCheckOverlaps);    // if true, check overlaps
+
+      //-----------------------------//
+      // Crystal                     //
+      //-----------------------------//
+      //box
+      sname.str("");
+      sname << "box_cry_" << iCry << "_" << jCry;
+      crystal_box[iCry][jCry] = new G4Box(sname.str().c_str(),  // box name
+                                          3.1/2.0,              // half dimension on x
+                                          3.1/2.0,              // half dimension on y
+                                          15.0/2.0);            // half dimension on z
+      //log
+      sname.str("");
+      sname << "log_cry_" << iCry << "_" << jCry;
+      crystal_log[iCry][jCry] = new G4LogicalVolume(crystal_box[iCry][jCry], // shape element
+                                                    airThinLayer,      // material
+                                                    sname.str().c_str(),     // name
+                                                    0,                 // field manager
+                                                    0,                 // sensitive detector
+                                                    0);                // user limits
+      //
+      crystal_log[iCry][jCry]-> SetVisAttributes(G4VisAttributes(G4Colour::Blue()));
+      //phys
+      sname.str("");
+      sname << "cry_" << iCry << "_" << jCry;
+      crystal_phys[iCry][jCry] = new G4PVPlacement(0,       // rotation wrt mother volume
+                                 G4ThreeVector(0,0,0),  // translation wrt mother
+                                 crystal_log[iCry][jCry],   // associated logical volume
+                                 sname.str().c_str(),     // name
+                                 esr_log[iCry][jCry],      // associated mother log
+                                 false,                     // not used,set to false
+                                 0,                         // copy number
+                                 fCheckOverlaps);           // if true, check overlaps
+      //
+
+
+      //-----------------------------//
+      // Double layer                //
+      //-----------------------------//
+      float center_x[6] = {-1.25,-0.75,-0.25,0.25,0.75,1.25};
+      for(int iLay = 0; iLay < 6 ; iLay++)
+      {
+        float x_c = center_x[iLay];
+        //box
+        sname.str("");
+        sname << "box_double_" << iCry << "_" << jCry << "_" << iLay;
+        double_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
+                                            0.5/2.0,              // half dimension on x
+                                            3.01/2.0,              // half dimension on y
+                                            15.0/2.0);            // half dimension on z
+        //log
+        sname.str("");
+        sname << "log_double_" << iCry << "_" << jCry<< "_" << iLay;
+        double_log[iCry][jCry][iLay] = new G4LogicalVolume(double_box[iCry][jCry][iLay], // shape element
+                                                      airThinLayer,      // material
+                                                      sname.str().c_str(),     // name
+                                                      0,                 // field manager
+                                                      0,                 // sensitive detector
+                                                      0);                // user limits
+        //
+        double_log[iCry][jCry][iLay]-> SetVisAttributes(G4VisAttributes(G4Colour::Grey()));
+        //phys
+        sname.str("");
+        sname << "double_" << iCry << "_" << jCry << "_" << iLay;
+        double_phys[iCry][jCry][iLay] = new G4PVPlacement(0,  // rotation wrt mother
+                                   G4ThreeVector(x_c,0,0),  // translation wrt mother
+                                   double_log[iCry][jCry][iLay],   // associated logical volume
+                                   sname.str().c_str(),     // name
+                                   crystal_log[iCry][jCry],      // associated mother log
+                                   false,                     // not used,set to false
+                                   0,                         // copy number
+                                   fCheckOverlaps);           // if true, check overlaps
+        //
+        //-----------------------------//
+        // lyso plate                  //
+        //-----------------------------//
+        //box
+        sname.str("");
+        sname << "box_lyso_" << iCry << "_" << jCry << "_" << iLay;
+        lyso_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
+                                            0.24/2.0,              // half dimension on x
+                                            3.0/2.0,              // half dimension on y
+                                            15.0/2.0);            // half dimension on z
+        //log
+        sname.str("");
+        sname << "log_lyso_" << iCry << "_" << jCry<< "_" << iLay;
+        lyso_log[iCry][jCry][iLay] = new G4LogicalVolume(lyso_box[iCry][jCry][iLay], // shape element
+                                                      LYSO,      // material
+                                                      sname.str().c_str(),     // name
+                                                      0,                 // field manager
+                                                      0,                 // sensitive detector
+                                                      0);                // user limits
+        //
+        lyso_log[iCry][jCry][iLay]-> SetVisAttributes(G4VisAttributes(G4Colour::Yellow()));
+        //phys
+        sname.str("");
+        sname << "lyso_" << iCry << "_" << jCry << "_" << iLay;
+        lyso_phys[iCry][jCry][iLay] = new G4PVPlacement(0,  // rotation wrt mother
+                                   G4ThreeVector(0.125,0,0),  // translation wrt mother
+                                   lyso_log[iCry][jCry][iLay],   // associated logical volume
+                                   sname.str().c_str(),     // name
+                                   double_log[iCry][jCry][iLay],      // associated mother log
+                                   false,                     // not used,set to false
+                                   0,                         // copy number
+                                   fCheckOverlaps);           // if true, check overlaps
+        //
+        //
+        //-----------------------------//
+        // plastic plate               //
+        //-----------------------------//
+        //box
+        sname.str("");
+        sname << "box_plastic_" << iCry << "_" << jCry << "_" << iLay;
+        plastic_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
+                                            0.24/2.0,              // half dimension on x
+                                            3.0/2.0,              // half dimension on y
+                                            15.0/2.0);            // half dimension on z
+        //log
+        sname.str("");
+        sname << "log_plastic_" << iCry << "_" << jCry<< "_" << iLay;
+        plastic_log[iCry][jCry][iLay] = new G4LogicalVolume(plastic_box[iCry][jCry][iLay], // shape element
+                                                      MyMaterials::Plastic(),      // material
+                                                      sname.str().c_str(),     // name
+                                                      0,                 // field manager
+                                                      0,                 // sensitive detector
+                                                      0);                // user limits
+        //
+        plastic_log[iCry][jCry][iLay]-> SetVisAttributes(G4VisAttributes(G4Colour::Cyan()));
+        //phys
+        sname.str("");
+        sname << "plastic_" << iCry << "_" << jCry << "_" << iLay;
+        plastic_phys[iCry][jCry][iLay] = new G4PVPlacement(0,  // rotation wrt mother
+                                   G4ThreeVector(-0.125,0,0),  // translation wrt mother
+                                   plastic_log[iCry][jCry][iLay],   // associated logical volume
+                                   sname.str().c_str(),     // name
+                                   double_log[iCry][jCry][iLay],      // associated mother log
+                                   false,                     // not used,set to false
+                                   0,                         // copy number
+                                   fCheckOverlaps);           // if true, check overlaps
+
+
+        //
+        //-----------------------------//
+        // LATERAL DEPO                //
+        //-----------------------------//
+        bool lateralLYSOdepolished = true;
+        if(lateralLYSOdepolished)
+        {
+          std::stringstream Surfname;
+          Surfname << "SurfLYSO_" << iCry << "_" << jCry << "_" << iLay;
+          depo_lyso[iCry][jCry][iLay][0] = new G4OpticalSurface(Surfname.str().c_str());
+          depo_lyso[iCry][jCry][iLay][0]->SetType(dielectric_dielectric);
+          depo_lyso[iCry][jCry][iLay][0]->SetFinish(ground);
+          depo_lyso[iCry][jCry][iLay][0]->SetModel(unified);
+          depo_lyso[iCry][jCry][iLay][0]->SetSigmaAlpha(latsigmaalpha);
+          depo_lyso[iCry][jCry][iLay][0]->SetMaterialPropertiesTable(crystalDepolished_surf);
+          depo_lyso_log[iCry][jCry][iLay][0] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 lyso_phys[iCry][jCry][iLay],
+                                 double_phys[iCry][jCry][iLay],
+                                 depo_lyso[iCry][jCry][iLay][0]);
+
+          //and the reverse...
+          Surfname << "_Inv";
+          depo_lyso[iCry][jCry][iLay][1] = new G4OpticalSurface(Surfname.str().c_str());
+          depo_lyso[iCry][jCry][iLay][1]->SetType(dielectric_dielectric);
+          depo_lyso[iCry][jCry][iLay][1]->SetFinish(ground);
+          depo_lyso[iCry][jCry][iLay][1]->SetModel(unified);
+          depo_lyso[iCry][jCry][iLay][1]->SetSigmaAlpha(latsigmaalpha);
+          depo_lyso[iCry][jCry][iLay][1]->SetMaterialPropertiesTable(crystalDepolished_surf);
+          depo_lyso_log[iCry][jCry][iLay][1] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 double_phys[iCry][jCry][iLay],
+                                 lyso_phys[iCry][jCry][iLay],
+                                 depo_lyso[iCry][jCry][iLay][1]);
+        }
+
+        //
+        //
+        bool lateralPLASTICdepolished = true;
+        if(lateralPLASTICdepolished)
+        {
+          std::stringstream Surfname;
+          Surfname << "SurfPLASTIC_" << iCry << "_" << jCry << "_" << iLay;
+          depo_plastic[iCry][jCry][iLay][0] = new G4OpticalSurface(Surfname.str().c_str());
+          depo_plastic[iCry][jCry][iLay][0]->SetType(dielectric_dielectric);
+          depo_plastic[iCry][jCry][iLay][0]->SetFinish(ground);
+          depo_plastic[iCry][jCry][iLay][0]->SetModel(unified);
+          depo_plastic[iCry][jCry][iLay][0]->SetSigmaAlpha(latsigmaalpha);
+          depo_plastic[iCry][jCry][iLay][0]->SetMaterialPropertiesTable(crystalDepolished_surf);
+          depo_plastic_log[iCry][jCry][iLay][0] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 plastic_phys[iCry][jCry][iLay],
+                                 double_phys[iCry][jCry][iLay],
+                                 depo_plastic[iCry][jCry][iLay][0]);
+
+          //and the reverse...
+          Surfname << "_Inv";
+          depo_plastic[iCry][jCry][iLay][1] = new G4OpticalSurface(Surfname.str().c_str());
+          depo_plastic[iCry][jCry][iLay][1]->SetType(dielectric_dielectric);
+          depo_plastic[iCry][jCry][iLay][1]->SetFinish(ground);
+          depo_plastic[iCry][jCry][iLay][1]->SetModel(unified);
+          depo_plastic[iCry][jCry][iLay][1]->SetSigmaAlpha(latsigmaalpha);
+          depo_plastic[iCry][jCry][iLay][1]->SetMaterialPropertiesTable(crystalDepolished_surf);
+          depo_plastic_log[iCry][jCry][iLay][1] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 double_phys[iCry][jCry][iLay],
+                                 plastic_phys[iCry][jCry][iLay],
+                                 depo_plastic[iCry][jCry][iLay][1]);
+        }
+
+
+        //-----------------------------//
+        // FRONT/BACK DEPO             //
+        //-----------------------------//
+        bool realLYSODepo = true;
+        if(realLYSODepo)
+        {
+          //FRONT
+          std::stringstream Surfname;
+          Surfname << "Real_Front_SurfLYSO_" << iCry << "_" << jCry << "_" << iLay;
+          real_depo_lyso[iCry][jCry][iLay][0] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_lyso[iCry][jCry][iLay][0]->SetType(dielectric_dielectric);
+          real_depo_lyso[iCry][jCry][iLay][0]->SetFinish(ground);
+          real_depo_lyso[iCry][jCry][iLay][0]->SetModel(unified);
+          real_depo_lyso[iCry][jCry][iLay][0]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_lyso[iCry][jCry][iLay][0]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_lyso_log[iCry][jCry][iLay][0] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 lyso_phys[iCry][jCry][iLay],
+                                 volumeInFront,
+                                 real_depo_lyso[iCry][jCry][iLay][0]);
+
+          //and the reverse...
+          Surfname << "_Inv";
+          real_depo_lyso[iCry][jCry][iLay][1] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_lyso[iCry][jCry][iLay][1]->SetType(dielectric_dielectric);
+          real_depo_lyso[iCry][jCry][iLay][1]->SetFinish(ground);
+          real_depo_lyso[iCry][jCry][iLay][1]->SetModel(unified);
+          real_depo_lyso[iCry][jCry][iLay][1]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_lyso[iCry][jCry][iLay][1]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_lyso_log[iCry][jCry][iLay][1] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 volumeInFront,
+                                 lyso_phys[iCry][jCry][iLay],
+                                 real_depo_lyso[iCry][jCry][iLay][1]);
+          //
+          //BACK
+          Surfname.str("");
+          Surfname << "Real_Back_ SurfLYSO_" << iCry << "_" << jCry << "_" << iLay;
+          real_depo_lyso[iCry][jCry][iLay][2] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_lyso[iCry][jCry][iLay][2]->SetType(dielectric_dielectric);
+          real_depo_lyso[iCry][jCry][iLay][2]->SetFinish(ground);
+          real_depo_lyso[iCry][jCry][iLay][2]->SetModel(unified);
+          real_depo_lyso[iCry][jCry][iLay][2]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_lyso[iCry][jCry][iLay][2]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_lyso_log[iCry][jCry][iLay][2] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 lyso_phys[iCry][jCry][iLay],
+                                 volumeOnTheBack,
+                                 real_depo_lyso[iCry][jCry][iLay][2]);
+
+          //and the reverse...
+          Surfname << "_Inv";
+          real_depo_lyso[iCry][jCry][iLay][3] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_lyso[iCry][jCry][iLay][3]->SetType(dielectric_dielectric);
+          real_depo_lyso[iCry][jCry][iLay][3]->SetFinish(ground);
+          real_depo_lyso[iCry][jCry][iLay][3]->SetModel(unified);
+          real_depo_lyso[iCry][jCry][iLay][3]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_lyso[iCry][jCry][iLay][3]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_lyso_log[iCry][jCry][iLay][3] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 volumeOnTheBack,
+                                 lyso_phys[iCry][jCry][iLay],
+                                 real_depo_lyso[iCry][jCry][iLay][3]);
+
+        }
+        bool realPLASTICDepo = true;
+        if(realPLASTICDepo)
+        {
+          //FRONT
+          std::stringstream Surfname;
+          Surfname << "Real_Front_SurfPLASTIC_" << iCry << "_" << jCry << "_" << iLay;
+          real_depo_plastic[iCry][jCry][iLay][0] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_plastic[iCry][jCry][iLay][0]->SetType(dielectric_dielectric);
+          real_depo_plastic[iCry][jCry][iLay][0]->SetFinish(ground);
+          real_depo_plastic[iCry][jCry][iLay][0]->SetModel(unified);
+          real_depo_plastic[iCry][jCry][iLay][0]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_plastic[iCry][jCry][iLay][0]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_plastic_log[iCry][jCry][iLay][0] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 plastic_phys[iCry][jCry][iLay],
+                                 volumeInFront,
+                                 real_depo_plastic[iCry][jCry][iLay][0]);
+
+          //and the reverse...
+          Surfname << "_Inv";
+          real_depo_plastic[iCry][jCry][iLay][1] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_plastic[iCry][jCry][iLay][1]->SetType(dielectric_dielectric);
+          real_depo_plastic[iCry][jCry][iLay][1]->SetFinish(ground);
+          real_depo_plastic[iCry][jCry][iLay][1]->SetModel(unified);
+          real_depo_plastic[iCry][jCry][iLay][1]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_plastic[iCry][jCry][iLay][1]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_plastic_log[iCry][jCry][iLay][1] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 volumeInFront,
+                                 plastic_phys[iCry][jCry][iLay],
+                                 real_depo_plastic[iCry][jCry][iLay][1]);
+          //
+          //BACK
+          Surfname.str("");
+          Surfname << "Real_Back_ SurfPLASTIC_" << iCry << "_" << jCry << "_" << iLay;
+          real_depo_plastic[iCry][jCry][iLay][2] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_plastic[iCry][jCry][iLay][2]->SetType(dielectric_dielectric);
+          real_depo_plastic[iCry][jCry][iLay][2]->SetFinish(ground);
+          real_depo_plastic[iCry][jCry][iLay][2]->SetModel(unified);
+          real_depo_plastic[iCry][jCry][iLay][2]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_plastic[iCry][jCry][iLay][2]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_plastic_log[iCry][jCry][iLay][2] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 plastic_phys[iCry][jCry][iLay],
+                                 volumeOnTheBack,
+                                 real_depo_plastic[iCry][jCry][iLay][2]);
+
+          //and the reverse...
+          Surfname << "_Inv";
+          real_depo_plastic[iCry][jCry][iLay][3] = new G4OpticalSurface(Surfname.str().c_str());
+          real_depo_plastic[iCry][jCry][iLay][3]->SetType(dielectric_dielectric);
+          real_depo_plastic[iCry][jCry][iLay][3]->SetFinish(ground);
+          real_depo_plastic[iCry][jCry][iLay][3]->SetModel(unified);
+          real_depo_plastic[iCry][jCry][iLay][3]->SetSigmaAlpha(realsigmaalpha);
+          real_depo_plastic[iCry][jCry][iLay][3]->SetMaterialPropertiesTable(crystalReal_surf);
+          real_depo_plastic_log[iCry][jCry][iLay][3] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                 volumeOnTheBack,
+                                 plastic_phys[iCry][jCry][iLay],
+                                 real_depo_plastic[iCry][jCry][iLay][3]);
+
+        }
+      }
+    }
+  }
+
+
+  // for all the esr box, made of air, make a esr surface between all pairs (too many but who cares)
+  bool esrStructure = true;
+  G4OpticalSurface*       esr_surf[4][4][4][4];
+  G4LogicalBorderSurface* esr_surf_log[4][4][4][4];
+
+  G4OpticalSurface*       esr_world[4][4];
+  G4LogicalBorderSurface* esr_world_log[4][4];
+  if(esrStructure)
+  {
+    for(int iFirst = 0; iFirst < 4 ; iFirst++) // create crystals
+    {
+      for(int jFirst = 0; jFirst < 4 ; jFirst++) // create crystals
+      {
+        for(int iSecond = 0; iSecond < 4 ; iSecond++) // create crystals
+        {
+          for(int jSecond = 0; jSecond < 4 ; jSecond++) // create crystals
+          {
+            //don't do it for a volume to itself (maybe would not harm, but anyway...)
+            if((iFirst == iSecond) && (jFirst == jSecond))
+            {
+              // do nothing
+            }
+            else
+            {
+              std::stringstream Surfname;
+              Surfname << "ESR_" << iFirst << "_" << jFirst << "_to_" << iSecond << "_" << jSecond;
+              esr_surf[iFirst][jFirst][iSecond][jSecond] = new G4OpticalSurface(Surfname.str().c_str());
+              esr_surf[iFirst][jFirst][iSecond][jSecond]->SetType(dielectric_metal);
+              esr_surf[iFirst][jFirst][iSecond][jSecond]->SetFinish(polished);
+              esr_surf[iFirst][jFirst][iSecond][jSecond]->SetModel(unified);
+              esr_surf[iFirst][jFirst][iSecond][jSecond]->SetMaterialPropertiesTable(ESR_surf);
+              esr_surf_log[iFirst][jFirst][iSecond][jSecond] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                                        esr_phys[iFirst][jFirst],
+                                                        esr_phys[iSecond][jSecond],
+                                                        esr_surf[iFirst][jFirst][iSecond][jSecond]);
+            }
+
+          }
+        }
+
+        // and a esr surf to the world...
+        std::stringstream Surfname;
+        Surfname << "ESR_world_" << iFirst << "_" << jFirst;
+        esr_world[iFirst][jFirst] = new G4OpticalSurface(Surfname.str().c_str());
+        esr_world[iFirst][jFirst]->SetType(dielectric_metal);
+        esr_world[iFirst][jFirst]->SetFinish(polished);
+        esr_world[iFirst][jFirst]->SetModel(unified);
+        esr_world[iFirst][jFirst]->SetMaterialPropertiesTable(ESR_surf);
+        esr_world_log[iFirst][jFirst] = new G4LogicalBorderSurface(Surfname.str().c_str(),
+                                                  esr_phys[iFirst][jFirst],
+                                                  expHall_phys,
+                                                  esr_world[iFirst][jFirst]);
+
+      }
     }
   }
 
 
 
 
-  float center_x[6] = {-1.25,-0.75,-0.25,0.25,0.75,1.25};
-  for(int iLay = 0; iLay < 6 ; iLay++)
-  {
-    std::stringstream layname;
-    layname << "layer" << iLay;
-    float x_c = center_x[iLay];
-    new G4PVPlacement(0,                 // rotation wrt mother volume
-                      G4ThreeVector(x_c,
-                                    0,
-                                    0),   // translation wrt mother
-                      double_air_log,     // associated logical volume
-                      layname.str().c_str(),  // name
-                      crystal_log,        // associated mother log
-                      false,              // not used,set to false
-                      0,                  // copy number
-                      fCheckOverlaps);    // if true, check overlaps
+  // if(lateralEsr)
+  //     {
+  //       std::stringstream Surfname;
+  //       Surfname << "Air_to_Esr_" << iCry << "_" << iLat;
+  //       G4OpticalSurface* temp_surf = new G4OpticalSurface(Surfname.str().c_str());
+  //       temp_surf->SetType(dielectric_metal);
+  //       temp_surf->SetFinish(polished);
+  //       temp_surf->SetModel(unified);
+  //       // temp_surf->SetSigmaAlpha(latsigmaalpha);
+  //       temp_surf->SetMaterialPropertiesTable(ESR_surf);
+  //       G4LogicalBorderSurface* temp_logical_border = new G4LogicalBorderSurface(Surfname.str().c_str(),
+  //                                                                                temp_element.physicalVolume,
+  //                                                                                temp_element.esr[iLat].physicalVolume,
+  //                                                                                temp_surf);
+  //       temp_element.air_to_esr_surface.push_back(temp_surf);
+  //       temp_element.air_to_esr_logical_surface.push_back(temp_logical_border);
+  //
+  //       //and the reverse...
+  //       Surfname << "_Inv";
+  //       G4OpticalSurface* temp_surf_inv = new G4OpticalSurface(Surfname.str().c_str());
+  //       temp_surf_inv->SetType(dielectric_dielectric);
+  //       temp_surf_inv->SetFinish(ground);
+  //       temp_surf_inv->SetModel(unified);
+  //       // temp_surf_inv->SetSigmaAlpha(latsigmaalpha);
+  //       temp_surf_inv->SetMaterialPropertiesTable(ESR_surf);
+  //       G4LogicalBorderSurface* temp_logical_border_inv = new G4LogicalBorderSurface(Surfname.str().c_str(),
+  //                                                                                    temp_element.esr[iLat].physicalVolume,
+  //                                                                                    temp_element.physicalVolume,
+  //                                                                                    temp_surf_inv);
+  //       temp_element.esr_to_air_surface.push_back(temp_surf_inv);
+  //       temp_element.esr_to_air_logical_surface.push_back(temp_logical_border_inv);
+  //
+  //     }
+  //
+  //     if(lateralEsr)
+  //     {
+  //       for(int t = 0; t < indexEsr.size(); t++)
+  //       {
+  //         std::stringstream Surfname;
+  //         Surfname << "Esr_to_World" << iCry << "_" << iLat << "_" << indexEsr[t];
+  //         G4OpticalSurface* temp_surf = new G4OpticalSurface(Surfname.str().c_str());
+  //         temp_surf->SetType(dielectric_metal);
+  //         temp_surf->SetFinish(polished);
+  //         temp_surf->SetModel(unified);
+  //         // temp_surf->SetSigmaAlpha(latsigmaalpha);
+  //         temp_surf->SetMaterialPropertiesTable(ESR_surf);
+  //         G4LogicalBorderSurface* temp_logical_border = new G4LogicalBorderSurface(Surfname.str().c_str(),
+  //                                                                                  temp_element.esr[iLat].physicalVolume,
+  //                                                                                  expHall_phys,
+  //                                                                                  temp_surf);
+  //         temp_element.esr_to_world_surface.push_back(temp_surf);
+  //         temp_element.esr_to_world_logical_surface.push_back(temp_logical_border);
+  //       }
+  //     }
 
-  }
-  // new G4PVPlacement(0,                 // rotation wrt mother volume
-  //                   G4ThreeVector(-0.25,
-  //                                 0,
-  //                                 0),   // translation wrt mother
-  //                   double_air_log,     // associated logical volume
-  //                   "double_air_phys1",  // name
-  //                   expHall_log,        // associated mother log
-  //                   false,              // not used,set to false
-  //                   0,                  // copy number
-  //                   fCheckOverlaps);    // if true, check overlaps
+
+
+
+
+
+
+  // full box (the crystal)
+  // G4Box *crystal_box = new G4Box("crystal_box",                     // box name
+  //                                   3.0/2.0,                              // half dimension on x
+  //                                   3.0/2.0,                         // half dimension on y
+  //                                   15.0/2.0);                        // half dimension on z
   // //
-  // new G4PVPlacement(0,                 // rotation wrt mother volume
-  //                   G4ThreeVector(0.25,
-  //                                 0,
-  //                                 0),   // translation wrt mother
-  //                   double_air_log,     // associated logical volume
-  //                   "double_air_phys2",  // name
-  //                   expHall_log,        // associated mother log
-  //                   false,              // not used,set to false
-  //                   0,                  // copy number
-  //                   fCheckOverlaps);    // if true, check overlaps
-
-  //Place in space
-
-  G4PVPlacement* plate_lyso_phys = new G4PVPlacement(0,           // rotation wrt mother volume
-                                              G4ThreeVector(0.125,
-                                                            0,
-                                                            0),   // translation wrt mother
-                                              plate_lyso_log,     // associated logical volume
-                                              "plate_lyso_phys",  // name
-                                              double_air_log,        // associated mother log
-                                              false,              // not used,set to false
-                                              0,                  // copy number
-                                              fCheckOverlaps);    // if true, check overlaps
+  // G4LogicalVolume *crystal_log = new G4LogicalVolume(crystal_box,       // shape element
+  //                                                    airThinLayer,      // material
+  //                                                    "crystal_log",     // name
+  //                                                    0,                 // field manager
+  //                                                    0,                 // sensitive detector
+  //                                                    0);                // user limits
+  // //
   //
-  G4PVPlacement* plate_plastic_phys = new G4PVPlacement(0,        // rotation wrt mother volume
-                                              G4ThreeVector(-0.125,
-                                                            0,
-                                                            0),   // translation wrt mother
-                                              plate_plastic_log,     // associated logical volume
-                                              "plate_plastic_phys",  // name
-                                              double_air_log,        // associated mother log
-                                              false,              // not used,set to false
-                                              0,                  // copy number
-                                              fCheckOverlaps);    // if true, check overlaps
+  // // double element air box
+  // G4Box *double_air_box = new G4Box("double_air_box",                     // box name
+  //                                   0.5/2.0,                              // half dimension on x
+  //                                   3.0/2.0,                         // half dimension on y
+  //                                   15.0/2.0);                        // half dimension on z
+  // //
+  // G4LogicalVolume *double_air_log = new G4LogicalVolume(double_air_box,       // shape element
+  //                                                       airThinLayer,         // material
+  //                                                       "double_air_log",     // name
+  //                                                       0,                    // field manager
+  //                                                       0,                    // sensitive detector
+  //                                                       0);                   // user limits
+  // //
   //
+  //
+  //
+  // // LYSO
+  // G4Box *plate_lyso_box = new G4Box("plate_lyso_box",                     // box name
+  //                                   0.24/2.0,                              // half dimension on x
+  //                                   3.0/2.0,                         // half dimension on y
+  //                                   15.0/2.0);                        // half dimension on z
+  //
+  // G4LogicalVolume *plate_lyso_log = new G4LogicalVolume(plate_lyso_box,       // shape element
+  //                                                       LYSO,         // material
+  //                                                       "plate_lyso_log",     // name
+  //                                                       0,                    // field manager
+  //                                                       0,                    // sensitive detector
+  //                                                       0);                   // user limits
+  // G4VisAttributes* plate_lyso_vis = new G4VisAttributes(G4Colour::Yellow());        // yellow
+  // plate_lyso_log->SetVisAttributes(plate_lyso_vis);                                 // set vis color
+  //
+  //
+  // // Plastic
+  // G4Box *plate_plastic_box = new G4Box("plate_plastic_box",                     // box name
+  //                                   0.24/2.0,                              // half dimension on x
+  //                                   3.0/2.0,                         // half dimension on y
+  //                                   15.0/2.0);                        // half dimension on z
+  //
+  // G4LogicalVolume *plate_plastic_log = new G4LogicalVolume(plate_plastic_box,       // shape element
+  //                                                       MyMaterials::Plastic(),         // material
+  //                                                       "plate_plastic_log",     // name
+  //                                                       0,                    // field manager
+  //                                                       0,                    // sensitive detector
+  //                                                       0);                   // user limits
+  // G4VisAttributes* plate_plastic_vis = new G4VisAttributes(G4Colour::Cyan());        // yellow
+  // plate_plastic_log->SetVisAttributes(plate_plastic_vis);                                 // set vis color
+  //
+  // //
+  // //
+  // float cry_x[4] = {-4.8,-1.6,+1.6,+4.8};
+  // float cry_y[4] = {-4.8,-1.6,+1.6,+4.8};
+  //
+  // for(int iCry = 0; iCry < 4 ; iCry++)
+  // {
+  //   for(int jCry = 0; jCry < 4 ; jCry++)
+  //   {
+  //     std::stringstream cryname;
+  //     cryname << "cry_" << iCry << "_" << jCry;
+  //
+  //     float x_c = cry_x[iCry];
+  //     float y_c = cry_y[jCry];
+  //
+  //     new G4PVPlacement(0,                 // rotation wrt mother volume
+  //                       G4ThreeVector(x_c,
+  //                                     y_c,
+  //                                     0),   // translation wrt mother
+  //                       crystal_log,     // associated logical volume
+  //                       cryname.str().c_str(),  // name
+  //                       expHall_log,        // associated mother log
+  //                       false,              // not used,set to false
+  //                       0,                  // copy number
+  //                       fCheckOverlaps);    // if true, check overlaps
+  //   }
+  // }
+  //
+  //
+  //
+  //
+  // float center_x[6] = {-1.25,-0.75,-0.25,0.25,0.75,1.25};
+  // G4PVPlacement* double_phys =
+  // for(int iLay = 0; iLay < 6 ; iLay++)
+  // {
+  //   std::stringstream layname;
+  //   layname << "layer" << iLay;
+  //   float x_c = center_x[iLay];
+  //   new G4PVPlacement(0,                 // rotation wrt mother volume
+  //                     G4ThreeVector(x_c,
+  //                                   0,
+  //                                   0),   // translation wrt mother
+  //                     double_air_log,     // associated logical volume
+  //                     layname.str().c_str(),  // name
+  //                     crystal_log,        // associated mother log
+  //                     false,              // not used,set to false
+  //                     0,                  // copy number
+  //                     fCheckOverlaps);    // if true, check overlaps
+  //
+  // }
+  // // new G4PVPlacement(0,                 // rotation wrt mother volume
+  // //                   G4ThreeVector(-0.25,
+  // //                                 0,
+  // //                                 0),   // translation wrt mother
+  // //                   double_air_log,     // associated logical volume
+  // //                   "double_air_phys1",  // name
+  // //                   expHall_log,        // associated mother log
+  // //                   false,              // not used,set to false
+  // //                   0,                  // copy number
+  // //                   fCheckOverlaps);    // if true, check overlaps
+  // // //
+  // // new G4PVPlacement(0,                 // rotation wrt mother volume
+  // //                   G4ThreeVector(0.25,
+  // //                                 0,
+  // //                                 0),   // translation wrt mother
+  // //                   double_air_log,     // associated logical volume
+  // //                   "double_air_phys2",  // name
+  // //                   expHall_log,        // associated mother log
+  // //                   false,              // not used,set to false
+  // //                   0,                  // copy number
+  // //                   fCheckOverlaps);    // if true, check overlaps
+  //
+  // //Place in space
+  //
+  // G4PVPlacement* plate_lyso_phys = new G4PVPlacement(0,           // rotation wrt mother volume
+  //                                             G4ThreeVector(0.125,
+  //                                                           0,
+  //                                                           0),   // translation wrt mother
+  //                                             plate_lyso_log,     // associated logical volume
+  //                                             "plate_lyso_phys",  // name
+  //                                             double_air_log,        // associated mother log
+  //                                             false,              // not used,set to false
+  //                                             0,                  // copy number
+  //                                             fCheckOverlaps);    // if true, check overlaps
+  // //
+  // G4PVPlacement* plate_plastic_phys = new G4PVPlacement(0,        // rotation wrt mother volume
+  //                                             G4ThreeVector(-0.125,
+  //                                                           0,
+  //                                                           0),   // translation wrt mother
+  //                                             plate_plastic_log,     // associated logical volume
+  //                                             "plate_plastic_phys",  // name
+  //                                             double_air_log,        // associated mother log
+  //                                             false,              // not used,set to false
+  //                                             0,                  // copy number
+  //                                             fCheckOverlaps);    // if true, check overlaps
+  // // -------------
+  // // DEPOLISHING LYSO
+  // // -------------
+  // bool depoLYSOplate = true;
+  // if(depoLYSOplate)
+  // {
+  //
+  // }
+  //
+  // // -------------
+  // // DEPOLISHING PLASTIC
+  // // -------------
+  // bool depoPLASTICplate = true;
+  // if(depoPLASTICplate)
+  // {
+  //
+  // }
+
 
 
   //-------------------------------------------------------------------//
