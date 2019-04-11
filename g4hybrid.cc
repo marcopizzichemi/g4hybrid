@@ -373,6 +373,13 @@ int main(int argc,char** argv)
   G4double sourcez = -(distance + (crystalz/2.0) + greaseBack + glassBack + airBack + fakeAir);
 
 
+  G4bool lateralLYSOdepolished = (bool) config.read<int>("lateralLYSOdepolished");
+  G4bool lateralPLASTICdepolished = (bool) config.read<int>("lateralPLASTICdepolished");
+  G4bool realLYSODepo = (bool) config.read<int>("realLYSODepo");
+  G4bool realPLASTICDepo = (bool) config.read<int>("realPLASTICDepo");
+  G4bool esrStructure = (bool) config.read<int>("esrStructure");
+
+
   // Choose the Random engine
   //
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
@@ -463,6 +470,12 @@ int main(int argc,char** argv)
   ((g4matrixDetectorConstruction*)detector)->SetEsrTransmittance(esrTransmittance);
   ((g4matrixDetectorConstruction*)detector)->SetSourceDistance(distance);
   ((g4matrixDetectorConstruction*)detector)->SetResolutionScale(resolutionScale);
+
+  ((g4matrixDetectorConstruction*)detector)->SetLateralLYSOdepolished(lateralLYSOdepolished);
+  ((g4matrixDetectorConstruction*)detector)->SetLateralPLASTICdepolished(lateralPLASTICdepolished);
+  ((g4matrixDetectorConstruction*)detector)->SetRealLYSODepo(realLYSODepo);
+  ((g4matrixDetectorConstruction*)detector)->SetRealPLASTICDepo(realPLASTICDepo);
+  ((g4matrixDetectorConstruction*)detector)->SetEsrStructure(esrStructure);
 
   // Set mandatory initialization classes
   //

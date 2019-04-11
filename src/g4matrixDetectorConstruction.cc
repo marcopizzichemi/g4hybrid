@@ -976,6 +976,8 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
   G4LogicalBorderSurface*  real_depo_plastic_log[4][4][6][4];
 
 
+
+
   for(int iCry = 0; iCry < 4 ; iCry++) // create crystals
   {
     for(int jCry = 0; jCry < 4 ; jCry++) // create crystals
@@ -1163,7 +1165,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         //-----------------------------//
         // LATERAL DEPO                //
         //-----------------------------//
-        bool lateralLYSOdepolished = true;
+
         if(lateralLYSOdepolished)
         {
           std::stringstream Surfname;
@@ -1195,7 +1197,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
 
         //
         //
-        bool lateralPLASTICdepolished = true;
+
         if(lateralPLASTICdepolished)
         {
           std::stringstream Surfname;
@@ -1229,7 +1231,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         //-----------------------------//
         // FRONT/BACK DEPO             //
         //-----------------------------//
-        bool realLYSODepo = true;
+
         if(realLYSODepo)
         {
           //FRONT
@@ -1287,7 +1289,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
                                  real_depo_lyso[iCry][jCry][iLay][3]);
 
         }
-        bool realPLASTICDepo = true;
+
         if(realPLASTICDepo)
         {
           //FRONT
@@ -1351,7 +1353,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
 
 
   // for all the esr box, made of air, make a esr surface between all pairs (too many but who cares)
-  bool esrStructure = true;
+
   G4OpticalSurface*       esr_surf[4][4][4][4];
   G4LogicalBorderSurface* esr_surf_log[4][4][4][4];
 

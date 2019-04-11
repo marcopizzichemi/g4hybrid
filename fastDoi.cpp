@@ -282,13 +282,13 @@ int main (int argc, char** argv)
   TH2F *scatter = new TH2F("Flood Map","Flood Map",1000,-7,7,1000,-7,7);
   TH2F *scatterReal = new TH2F("Flood Map Real","Flood Map Real",1000,-7,7,1000,-7,7);
   TH2F *Rz_w = new TH2F("Rz_w","Rz_w",500,0,1,100,-8,8);
-  TH1F *spectrum = new TH1F("spectrum","spectrum",500,0,5000);
+  TH1F *spectrum = new TH1F("spectrum","spectrum",500,0,10000);
   TH1F *H_realZ = new TH1F("H_realZ","H_realZ",100,-8,8);
   TH1F *H_w = new TH1F("H_w","H_w",500,0,1);
 
   TH3I *scatter3D = new TH3I("Flood Map 3D","Flood Map 3D",100,-7,7,100,-7,7,100,0,1);
 
-  TH1F *spectrum1Cry = new TH1F("spectrum1Cry","spectrum 1Cry",500,0,5000);
+  TH1F *spectrum1Cry = new TH1F("spectrum1Cry","spectrum 1Cry",500,0,10000);
   TH2F *scatter1Cry = new TH2F("Flood Map1Cry","Flood Map 1Cry",1000,-7,7,1000,-7,7);
   TH2F *scatterReal1Cry = new TH2F("Flood Map Real 1Cry","Flood Map Real 1Cry",1000,-7,7,1000,-7,7);
   TH3I *scatter3D1Cry = new TH3I("Flood Map 3D 1Cry","Flood Map 3D 1Cry",100,-7,7,100,-7,7,100,0,1);
@@ -380,14 +380,14 @@ int main (int argc, char** argv)
     scatterReal->Fill(RealX,RealY);
 
     // select one "peak in 2d"
-    if( (FloodX > -1.45 ) && (FloodX < -1.25 ) && (FloodY > 1.3 ) && (FloodY < 1.7 )  )
+    if( (FloodX > 1.1 ) && (FloodX < 2.2 ) && (FloodY > 1.3 ) && (FloodY < 1.6 )  )
     {
       spectrum1Cry->Fill(totalCharge);
       scatter1Cry->Fill(FloodX,FloodY);
       scatter3D1Cry->Fill(FloodX,FloodY,FloodZ);
       scatterReal1Cry->Fill(RealX,RealY);
       // select photopeak
-      if( (totalCharge > 2000 ) && (totalCharge < 2700 ) )
+      if( (totalCharge > 4600 ) && (totalCharge < 8000 ) )
       {
         H_realZ->Fill(RealZ);
         H_w->Fill(FloodZ);
@@ -450,14 +450,16 @@ int main (int argc, char** argv)
   scatter->Write();
   scatter3D->Write();
   scatterReal->Write();
-  H_realZ->Write();
-  H_w->Write();
-  Rz_w->Write();
+
 
   spectrum1Cry   ->Write();
   scatter1Cry    ->Write();
   scatter3D1Cry  ->Write();
   scatterReal1Cry->Write();
+
+  H_realZ->Write();
+  H_w->Write();
+  Rz_w->Write();
 
   //save the full command line
   TNamed CommandNameD("Command",streamCommand.str().c_str());

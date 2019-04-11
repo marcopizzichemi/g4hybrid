@@ -119,6 +119,14 @@ public:
   void SetAirGap(G4double x) { airgap = x *mm ; };
   void SetSourceRadius(G4double x) {sphereRadius = x;};
 
+  void SetLateralLYSOdepolished   (G4bool x) { lateralLYSOdepolished = x; };
+  void SetLateralPLASTICdepolished(G4bool x) { lateralPLASTICdepolished = x; };
+  void SetRealLYSODepo            (G4bool x) { realLYSODepo = x; };
+  void SetRealPLASTICDepo         (G4bool x) { realPLASTICDepo = x; };
+  void SetEsrStructure            (G4bool x) { esrStructure = x; };
+
+
+
 private:
 
   G4double fCrystal_x;				//x dimensions of crystals
@@ -259,6 +267,12 @@ private:
   G4double latspecularspike;
   G4double latbackscattering;
   G4double latsurfaceroughness;
+
+  G4bool lateralLYSOdepolished;
+  G4bool lateralPLASTICdepolished;
+  G4bool realLYSODepo;
+  G4bool realPLASTICDepo;
+  G4bool esrStructure;
 
   G4bool   realdepolished;
   G4double realsigmaalpha;
