@@ -1,7 +1,6 @@
 // compile with
 // g++ -o ../build/simToPet simToPet.cpp `root-config --cflags --glibs` && cp structDictionary.C ../build/
-// syntax
-// simRead_base `ls out*`
+
 
 #include "TROOT.h"
 #include "TTree.h"

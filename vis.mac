@@ -54,9 +54,12 @@
 #
 # Many other options are available with /vis/modeling and /vis/filtering.
 # For example, to select colour by particle ID:
+
 #/vis/modeling/trajectories/create/drawByParticleID
-#/vis/modeling/trajectories/drawByParticleID-0/set e- blue
+#vis/modeling/trajectories/drawByParticleID-0/set opticalPhoton cyan
+
 #
+
 # To superimpose all of the events from a given run:
 /vis/scene/endOfEventAction accumulate
 #
