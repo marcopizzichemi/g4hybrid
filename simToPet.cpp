@@ -23,7 +23,7 @@
 #include <getopt.h>
 
 
-#include "../code/struct.hh"
+#include "../g4hybrid/struct.hh"
 
 // bool compareByTime(const enDep &a,const enDep  &b)
 // {
@@ -528,6 +528,23 @@ int main (int argc, char** argv)
         sipm[i].timestamp +=  (Float_t) ((gRandom->Gaus(sipm[i].listOfTimestamps[j],sigmaSPTR) / effectiveN)*1e-9); // default smearing at 0.087, and convert to seconds
       }
       timestamp[i] = (Float_t) sipm[i].timestamp;
+      //calculate the current in the Sipm
+      
+      float current_values[24] = {0,0.8987406715,0.8186935828,0.7408179941,0.6703200447,0.6065306597,0.9417645336,0.4965853038,0.4493289641,0.4065696597,0.3678794412,0.3328710837,0.8869204367,0.272531793,0.2465969639,0.2231301601,0.201896518,0.1826835241,0.8352702114,0.1495686192,0.1353352832,0.1224564283,0.1108031584,0.1002588437};
+      TH1F* h_current = new TH1F("h1", "h1 title", 100, 0.0, sipm[i].listOfTimestamps.back()+100);
+
+      for (int k = 0; k < sipm[i].listOfTimestamps.size(); k++)
+      {
+        for (int j = 0; j < 24; j++)
+        {
+          h_current->Fill(sipm[i].listOfTimestamps[k]+j,current_values[j]);
+          //std::cout<<"ch:\t"<<i<<"\t"<<"timestamp:\t"<<k<<"punto\t"<<j<<std::endl;
+        }
+      }
+      //if(iEvent==10 && i==1)
+      std::cout << h_current->Integral(0,sipm[i].listOfTimestamps.size()) << std::endl;
+      delete h_current;
+      
     }
 
     // 0.087
@@ -595,8 +612,8 @@ int main (int argc, char** argv)
     int perc = ((100*counter)/nEntries); //should strictly have not decimal part, written like this...
     if( (perc % 10) == 0 )
     {
-      std::cout << "\r";
-      std::cout << perc << "% done... ";
+      //std::cout << "\r";
+      //std::cout << perc << "% done... ";
       //std::cout << counter << std::endl;
     }
 

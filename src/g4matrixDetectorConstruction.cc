@@ -995,7 +995,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
       esr_box[iCry][jCry] = new G4Box(sname.str().c_str(),  // box name
                                           (fCrystal_x+0.1)/2.0,              // half dimension on x
                                           (fCrystal_x+0.1)/2.0,              // half dimension on y
-                                          15.0/2.0);            // half dimension on z
+                                          fCrystal_z/2.0);            // half dimension on z
       //log
       sname.str("");
       sname << "log_esr_" << iCry << "_" << jCry;
@@ -1031,7 +1031,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
       crystal_box[iCry][jCry] = new G4Box(sname.str().c_str(),  // box name
                                           fCrystal_x/2.0,              // half dimension on x
                                           fCrystal_y/2.0,              // half dimension on y
-                                          15.0/2.0);            // half dimension on z
+                                          fCrystal_z/2.0);            // half dimension on z
       //log
       sname.str("");
       sname << "log_cry_" << iCry << "_" << jCry;
@@ -1081,7 +1081,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         double_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
                                             x_width_of_a_double/2.0,              // half dimension on x
                                             (fCrystal_y-0.1)/2.0,              // half dimension on y
-                                            15.0/2.0);            // half dimension on z
+                                            fCrystal_z/2.0);            // half dimension on z
         //log
         sname.str("");
         sname << "log_double_" << iCry << "_" << jCry<< "_" << iLay;
@@ -1115,7 +1115,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         lyso_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
                                             fLYSO_x/2.0,              // half dimension on x
                                             (fCrystal_y-0.1)/2.0,              // half dimension on y
-                                            15.0/2.0);            // half dimension on z
+                                            fCrystal_z/2.0);            // half dimension on z
         //log
         sname.str("");
         sname << "log_lyso_" << iCry << "_" << jCry<< "_" << iLay;
@@ -1150,7 +1150,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         plastic_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
                                             fPlastic_x/2.0,              // half dimension on x
                                             (fCrystal_y-0.1)/2.0,              // half dimension on y
-                                            15.0/2.0);            // half dimension on z
+                                            fCrystal_z/2.0);            // half dimension on z
         //log
         sname.str("");
         sname << "log_plastic_" << iCry << "_" << jCry<< "_" << iLay;
