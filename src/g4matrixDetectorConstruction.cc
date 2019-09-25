@@ -941,6 +941,8 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
 
   float cry_x[4] = {-4.8,-1.6,+1.6,+4.8};
   float cry_y[4] = {-4.8,-1.6,+1.6,+4.8};
+
+  int number_of_couples = 8;
   // prepare arrays of pointers
   // esr
   G4Box           *esr_box[4][4];
@@ -951,30 +953,29 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
   G4LogicalVolume *crystal_log[4][4];
   G4PVPlacement   *crystal_phys[4][4];
   // double layers
-  G4Box           *double_box[4][4][6];
-  G4LogicalVolume *double_log[4][4][6];
-  G4PVPlacement   *double_phys[4][4][6];
+  G4Box           *double_box[4][4][number_of_couples];
+  G4LogicalVolume *double_log[4][4][number_of_couples];
+  G4PVPlacement   *double_phys[4][4][number_of_couples];
   // lyso plates
-  G4Box           *lyso_box[4][4][6];
-  G4LogicalVolume *lyso_log[4][4][6];
-  G4PVPlacement   *lyso_phys[4][4][6];
+  G4Box           *lyso_box[4][4][number_of_couples];
+  G4LogicalVolume *lyso_log[4][4][number_of_couples];
+  G4PVPlacement   *lyso_phys[4][4][number_of_couples];
   // plastic plates
-  G4Box           *plastic_box[4][4][6];
-  G4LogicalVolume *plastic_log[4][4][6];
-  G4PVPlacement   *plastic_phys[4][4][6];
+  G4Box           *plastic_box[4][4][number_of_couples];
+  G4LogicalVolume *plastic_log[4][4][number_of_couples];
+  G4PVPlacement   *plastic_phys[4][4][number_of_couples];
   // depo lyso surfs
-  G4OpticalSurface*        depo_lyso[4][4][6][2];
-  G4LogicalBorderSurface*  depo_lyso_log[4][4][6][2];
+  G4OpticalSurface*        depo_lyso[4][4][number_of_couples][2];
+  G4LogicalBorderSurface*  depo_lyso_log[4][4][number_of_couples][2];
   // depo plastic surfs
-  G4OpticalSurface*        depo_plastic[4][4][6][2];
-  G4LogicalBorderSurface*  depo_plastic_log[4][4][6][2];
+  G4OpticalSurface*        depo_plastic[4][4][number_of_couples][2];
+  G4LogicalBorderSurface*  depo_plastic_log[4][4][number_of_couples][2];
   // real depo lyso surfs
-  G4OpticalSurface*        real_depo_lyso[4][4][6][4];
-  G4LogicalBorderSurface*  real_depo_lyso_log[4][4][6][4];
+  G4OpticalSurface*        real_depo_lyso[4][4][number_of_couples][4];
+  G4LogicalBorderSurface*  real_depo_lyso_log[4][4][number_of_couples][4];
   // real depo plastic surfs
-  G4OpticalSurface*        real_depo_plastic[4][4][6][4];
-  G4LogicalBorderSurface*  real_depo_plastic_log[4][4][6][4];
-
+  G4OpticalSurface*        real_depo_plastic[4][4][number_of_couples][4];
+  G4LogicalBorderSurface*  real_depo_plastic_log[4][4][number_of_couples][4];
 
 
 
@@ -992,8 +993,8 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
       sname.str("");
       sname << "box_esr_" << iCry << "_" << jCry;
       esr_box[iCry][jCry] = new G4Box(sname.str().c_str(),  // box name
-                                          3.2/2.0,              // half dimension on x
-                                          3.2/2.0,              // half dimension on y
+                                          (fCrystal_x+0.1)/2.0,              // half dimension on x
+                                          (fCrystal_x+0.1)/2.0,              // half dimension on y
                                           15.0/2.0);            // half dimension on z
       //log
       sname.str("");
@@ -1028,8 +1029,8 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
       sname.str("");
       sname << "box_cry_" << iCry << "_" << jCry;
       crystal_box[iCry][jCry] = new G4Box(sname.str().c_str(),  // box name
-                                          3.1/2.0,              // half dimension on x
-                                          3.1/2.0,              // half dimension on y
+                                          fCrystal_x/2.0,              // half dimension on x
+                                          fCrystal_y/2.0,              // half dimension on y
                                           15.0/2.0);            // half dimension on z
       //log
       sname.str("");
@@ -1059,16 +1060,27 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
       //-----------------------------//
       // Double layer                //
       //-----------------------------//
-      float center_x[6] = {-1.25,-0.75,-0.25,0.25,0.75,1.25};
-      for(int iLay = 0; iLay < 6 ; iLay++)
+      
+      float x_width_of_a_double = (fCrystal_x-0.1)/number_of_couples; 
+      float x_air_gap           = 0.01;
+
+      float center_x[number_of_couples]; 
+
+      for (int i = 0; i < number_of_couples; i++)
+      {
+        center_x[i]=1.5/number_of_couples*(2*i-number_of_couples+1);
+        std::cout << center_x[i] << std::endl;
+      }
+      
+      for(int iLay = 0; iLay < number_of_couples ; iLay++)
       {
         float x_c = center_x[iLay];
         //box
         sname.str("");
         sname << "box_double_" << iCry << "_" << jCry << "_" << iLay;
         double_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
-                                            0.5/2.0,              // half dimension on x
-                                            3.01/2.0,              // half dimension on y
+                                            x_width_of_a_double/2.0,              // half dimension on x
+                                            (fCrystal_y-0.1)/2.0,              // half dimension on y
                                             15.0/2.0);            // half dimension on z
         //log
         sname.str("");
@@ -1092,6 +1104,7 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
                                    false,                     // not used,set to false
                                    0,                         // copy number
                                    fCheckOverlaps);           // if true, check overlaps
+        
         //
         //-----------------------------//
         // lyso plate                  //
@@ -1100,8 +1113,8 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         sname.str("");
         sname << "box_lyso_" << iCry << "_" << jCry << "_" << iLay;
         lyso_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
-                                            0.24/2.0,              // half dimension on x
-                                            3.0/2.0,              // half dimension on y
+                                            fLYSO_x/2.0,              // half dimension on x
+                                            (fCrystal_y-0.1)/2.0,              // half dimension on y
                                             15.0/2.0);            // half dimension on z
         //log
         sname.str("");
@@ -1118,13 +1131,14 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         sname.str("");
         sname << "lyso_" << iCry << "_" << jCry << "_" << iLay;
         lyso_phys[iCry][jCry][iLay] = new G4PVPlacement(0,  // rotation wrt mother
-                                   G4ThreeVector(0.125,0,0),  // translation wrt mother
+                                   G4ThreeVector((fPlastic_x+x_air_gap)/2,0,0),  // translation wrt mother
                                    lyso_log[iCry][jCry][iLay],   // associated logical volume
                                    sname.str().c_str(),     // name
                                    double_log[iCry][jCry][iLay],      // associated mother log
                                    false,                     // not used,set to false
                                    0,                         // copy number
                                    fCheckOverlaps);           // if true, check overlaps
+        
         //
         //
         //-----------------------------//
@@ -1134,8 +1148,8 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         sname.str("");
         sname << "box_plastic_" << iCry << "_" << jCry << "_" << iLay;
         plastic_box[iCry][jCry][iLay] = new G4Box(sname.str().c_str(),  // box name
-                                            0.24/2.0,              // half dimension on x
-                                            3.0/2.0,              // half dimension on y
+                                            fPlastic_x/2.0,              // half dimension on x
+                                            (fCrystal_y-0.1)/2.0,              // half dimension on y
                                             15.0/2.0);            // half dimension on z
         //log
         sname.str("");
@@ -1152,14 +1166,14 @@ G4VPhysicalVolume* g4matrixDetectorConstruction::Construct()
         sname.str("");
         sname << "plastic_" << iCry << "_" << jCry << "_" << iLay;
         plastic_phys[iCry][jCry][iLay] = new G4PVPlacement(0,  // rotation wrt mother
-                                   G4ThreeVector(-0.125,0,0),  // translation wrt mother
+                                   G4ThreeVector(-(fLYSO_x+x_air_gap)/2,0,0),  // translation wrt mother
                                    plastic_log[iCry][jCry][iLay],   // associated logical volume
                                    sname.str().c_str(),     // name
                                    double_log[iCry][jCry][iLay],      // associated mother log
                                    false,                     // not used,set to false
                                    0,                         // copy number
                                    fCheckOverlaps);           // if true, check overlaps
-
+        
 
         //
         //-----------------------------//

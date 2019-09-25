@@ -151,6 +151,10 @@ int main(int argc,char** argv)
   G4cout<< "Random seed : "<< myseed <<G4endl;
   G4cout << "Output file '" << filename << ".root '..."<< G4endl;
 
+  //read foils dimensions
+  G4double plasticx = config.read<double>("plasticx");
+  G4double lysox = config.read<double>("lysox");
+
   //read crystal dimensions
   G4double crystalx = config.read<double>("crystalx");
   G4double crystaly = config.read<double>("crystaly");
@@ -412,6 +416,7 @@ int main(int argc,char** argv)
 
   //set the parameters of detector
   ((g4matrixDetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
+  ((g4matrixDetectorConstruction*)detector)->SetFoilsDimensions(plasticx,lysox);
   ((g4matrixDetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
   ((g4matrixDetectorConstruction*)detector)->SetThinAirThickness(esrThickness);
   ((g4matrixDetectorConstruction*)detector)->SetLateralEsr(lateralEsr);

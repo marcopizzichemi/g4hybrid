@@ -82,6 +82,8 @@ private:
   G4double esrThickness;
   G4double crystalx;
   G4double crystaly;
+  G4double plasticx;
+  G4double lysox;
   G4int ncrystalx;
   G4int ncrystaly;
   G4bool backgroudSimulation;

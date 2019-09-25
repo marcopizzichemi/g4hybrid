@@ -55,6 +55,8 @@ fParticleGun(0)
   G4int n_particle = 1;
   fParticleGun = new G4ParticleGun(n_particle);
 
+  plasticx = config.read<double>("plasticx");
+  lysox    = config.read<double>("lysox");
   crystalx = config.read<double>("crystalx");
   crystaly = config.read<double>("crystaly");
   crystalz = config.read<double>("crystalz");
