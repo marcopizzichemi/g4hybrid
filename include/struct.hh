@@ -42,4 +42,5 @@ struct enDep
   std::string ProcessName;
   std::string ParticleName;
   int PDGEncoding;
+  int Material;
 };

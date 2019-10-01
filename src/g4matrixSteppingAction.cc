@@ -328,7 +328,7 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
 
     if(edep != 0) //if there was en dep, save the data
     {
-      if(materialName == "LYSO") //if the electron is interacting with the detector, it does a huge number of cherenkov
+      if(materialName == "LYSO" || materialName == "Plastic") //if the electron is interacting with the detector, it does a huge number of cherenkov
       {
         //add total energy deposited
         CreateTree::Instance()->totalEnergyDeposited += edep;
@@ -384,7 +384,18 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
         std::stringstream nameOfTheProcess;
         nameOfTheProcess << ProcessDefinedName;
         enDep energyDeposition;
-
+        
+        int Material;
+        if (materialName == "LYSO")
+        {
+          Material = 1;
+        }
+        else
+        {
+          Material = 2;
+        }
+        
+        
         // energyDeposition.ParticleID      =
         energyDeposition.CrystalI        = iCry;
         energyDeposition.CrystalJ        = jCry;
@@ -399,6 +410,8 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
         energyDeposition.ProcessName     = nameOfTheProcess.str();
         energyDeposition.ParticleName    = nameOfTheParticle.str();
         energyDeposition.PDGEncoding     = PDGEncoding;
+        energyDeposition.Material        = Material;
+        
         // energyDeposition.PDGcode         = (Float_t) positionVector.getZ();
         // energyDeposition.Process         = (Float_t) positionVector.getZ();
 
