@@ -43,4 +43,7 @@ struct enDep
   std::string ParticleName;
   int PDGEncoding;
   int Material;
+  float EnergyDepositedLYSO;
+  float EnergyDepositedPlastic;
+
 };

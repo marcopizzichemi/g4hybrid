@@ -54,6 +54,9 @@ nDetectorsY(k)
   this->GetTree()->Branch("SourceMomentumY",&this->SourceMomentumY,"SourceMomentumY/F");
   this->GetTree()->Branch("SourceMomentumZ",&this->SourceMomentumZ,"SourceMomentumZ/F");
   this->GetTree()->Branch("totalEnergyDeposited",&this->totalEnergyDeposited,"totalEnergyDeposited/F");
+  this->GetTree()->Branch("totalEnergyDepositedLYSO",&this->totalEnergyDepositedLYSO,"totalEnergyDepositedLYSO/F");
+  this->GetTree()->Branch("totalEnergyDepositedPlastic",&this->totalEnergyDepositedPlastic,"totalEnergyDepositedPlastic/F");
+
   this->GetTree()->Branch("NumOptPhotons",&this->NumOptPhotons,"NumOptPhotons/I");
   this->GetTree()->Branch("NumCherenkovPhotons",&this->NumCherenkovPhotons,"NumCherenkovPhotons/I");
   this->GetTree()->Branch("energyDeposition","std::vector<enDep>",&energyDeposition);
@@ -199,6 +202,8 @@ void CreateTree::Clear()
   NumOptPhotons=0;
   NumCherenkovPhotons=0;
   totalEnergyDeposited=0;
+  totalEnergyDepositedLYSO=0;
+  totalEnergyDepositedPlastic=0;
 
   // for(int i = 0; i < nCrystalsX*nCrystalsY ; i++)
   // {

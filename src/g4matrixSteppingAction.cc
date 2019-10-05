@@ -332,6 +332,15 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
       {
         //add total energy deposited
         CreateTree::Instance()->totalEnergyDeposited += edep;
+        if(materialName == "LYSO")
+        {
+          CreateTree::Instance()->totalEnergyDepositedLYSO += edep;
+        }
+        else
+        {
+          CreateTree::Instance()->totalEnergyDepositedPlastic += edep;
+        }
+        
         //take crystal name from physical volume
         G4String crystalNamePV = step->GetPreStepPoint()->GetPhysicalVolume()->GetName();
         //convert it to int
@@ -389,10 +398,12 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
         if (materialName == "LYSO")
         {
           Material = 1;
+          energyDeposition.EnergyDepositedLYSO = (Float_t) edep;
         }
         else
         {
           Material = 2;
+          energyDeposition.EnergyDepositedPlastic = (Float_t) edep;
         }
         
         

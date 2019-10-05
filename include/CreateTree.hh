@@ -54,6 +54,8 @@ public:
   Float_t             totalEnergyDeposited;
   Int_t               NumOptPhotons;
   Int_t               NumCherenkovPhotons;
+  Float_t             totalEnergyDepositedLYSO;
+  Float_t             totalEnergyDepositedPlastic;
 
   //Hits on detectors
   Short_t*            DetectorHit;

@@ -228,6 +228,9 @@ int main (int argc, char** argv)
   int Run;                            // run id (usually just 1)(read every time, but always the same)
   int Event;                          // event id
   float totalEnergyDeposited;         // total energy deposited in this event, in all the matrix
+  float totalEnergyDepositedLYSO;         // total energy deposited in this event, in all the matrix
+  float totalEnergyDepositedPlastic;         // total energy deposited in this event, in all the matrix
+
   int NumOptPhotons;                  // number of optical photons generated in this event, in the entire matrix
   int NumCherenkovPhotons;            // number of Cherenkov photons generated in this event, in the entire matrix
 
@@ -251,6 +254,9 @@ int main (int argc, char** argv)
   tree->SetBranchAddress("Run",&Run);
   tree->SetBranchAddress("Event",&Event);
   tree->SetBranchAddress("totalEnergyDeposited",&totalEnergyDeposited);
+  tree->SetBranchAddress("totalEnergyDepositedLYSO",&totalEnergyDepositedLYSO);
+  tree->SetBranchAddress("totalEnergyDepositedPlastic",&totalEnergyDepositedPlastic);
+
   tree->SetBranchAddress("NumOptPhotons",&NumOptPhotons);
   tree->SetBranchAddress("NumCherenkovPhotons",&NumCherenkovPhotons);
 
@@ -321,6 +327,9 @@ int main (int argc, char** argv)
   t1->Branch("CrystalsHit",&CrystalsHit,"CrystalsHit/S");
   t1->Branch("NumbOfInteractions",&NumbOfInteractions,"NumbOfInteractions/S");
   t1->Branch("TotalEnergyDeposited",&TotalEnergyDeposited_out,"TotalEnergyDeposited/F");
+  //t1->Branch("TotalEnergyDepositedLYSO",&TotalEnergyDepositedLYSO_out,"TotalEnergyDepositedLYSO/F");
+  //t1->Branch("TotalEnergyDepositedPlastic",&TotalEnergyDepositedPlastic_out,"TotalEnergyDepositedPlastic/F");
+
 
   //saturation part
   //create an array of spads
@@ -424,7 +433,7 @@ int main (int argc, char** argv)
   long int counter = 0;
   int nEntries = tree->GetEntries();
   std::cout << "nEntries = " << nEntries << std::endl;
-
+  int counterPlastic=0;
   for(int iEvent = 0; iEvent < nEntries ; iEvent++)
   {
     tree->GetEvent(iEvent);
@@ -553,12 +562,19 @@ int main (int argc, char** argv)
       h_current->Draw("hist p");
       std::string str = std::to_string(iEvent);
       str = str + "ch" + std::to_string(i) +".pdf";
-      //str.append(".pdf");
-      //c1->Print(str.c_str());
+      str.append(".pdf");
+      //std::cout<<iEvent<<std::endl;
+      if ((totalEnergyDepositedPlastic > 0.25) && (totalEnergyDeposited > 0.5))
+      {
+        //std::cout<< totalEnergyDepositedPlastic<<std::endl;
+        //c1->Print(str.c_str());
+      }
+      
+      
       int bin_max = h_current->GetMaximumBin();
       //std::cout << "aomplitude:\t"  << h_current->GetBinContent(bin_max)  << std::endl;
       //std::cout << "integral:\t"    << h_current->Integral(0,10000)       << std::endl;
-      std::cout << h_current->Integral(0,10000) <<" \t"  << h_current->GetBinContent(bin_max)  << std::endl;
+      //std::cout << h_current->Integral(0,10000) <<" \t"  << h_current->GetBinContent(bin_max)  << std::endl;
       delete h_current;
       delete c1;
 
@@ -570,7 +586,18 @@ int main (int argc, char** argv)
     h_sum->Draw("hist p");
     std::string str = std::to_string(iEvent);
     str.append(".pdf");
-    //c2->Print(str.c_str());
+    if (totalEnergyDepositedPlastic > 0.1)
+    {
+      //std::cout << "one out of "<<nEntries<< " events"<<std::endl;
+      counterPlastic = counterPlastic+1;
+      if (totalEnergyDepositedPlastic > 0.25 && totalEnergyDeposited > 0.5)
+      {
+        c2->Print(str.c_str());    
+      }      
+    }
+
+
+    
     //int bin_max = h_current->GetMaximumBin();
     //std::cout << "aomplitude:\t"  << h_current->GetBinContent(bin_max)  << std::endl;
     //std::cout << "integral:\t"    << h_current->Integral(0,10000)       << std::endl;
@@ -652,6 +679,7 @@ int main (int argc, char** argv)
 
 
   }
+  std::cout << counterPlastic << " out of " << nEntries << std::endl;  
   std::cout << std::endl;
   std::cout << "Writing output to file "<< outputFileName << std::endl;
 

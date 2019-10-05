@@ -114,6 +114,7 @@ fRunAction(runAction)
         myfile.close();
 
         G4cout << "Total Energy deposited in this event = "<< CreateTree::Instance()->totalEnergyDeposited << " MeV" << G4endl;
+        
       }
       else
       {
