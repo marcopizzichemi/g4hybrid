@@ -57,6 +57,7 @@ fParticleGun(0)
 
   plasticx = config.read<double>("plasticx");
   lysox    = config.read<double>("lysox");
+  ncouples = config.read<double>("ncouples");
   crystalx = config.read<double>("crystalx");
   crystaly = config.read<double>("crystaly");
   crystalz = config.read<double>("crystalz");

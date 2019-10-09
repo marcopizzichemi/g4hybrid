@@ -433,7 +433,9 @@ int main (int argc, char** argv)
   long int counter = 0;
   int nEntries = tree->GetEntries();
   std::cout << "nEntries = " << nEntries << std::endl;
-  int counterPlastic=0;
+  int counterPlastic    = 0;
+  int counter511        = 0;
+  int counter511shared  = 0;
   for(int iEvent = 0; iEvent < nEntries ; iEvent++)
   {
     tree->GetEvent(iEvent);
@@ -590,11 +592,22 @@ int main (int argc, char** argv)
     {
       //std::cout << "one out of "<<nEntries<< " events"<<std::endl;
       counterPlastic = counterPlastic+1;
-      if (totalEnergyDepositedPlastic > 0.25 && totalEnergyDeposited > 0.5)
-      {
-        c2->Print(str.c_str());    
-      }      
+      //if (totalEnergyDepositedPlastic > 0.25 && totalEnergyDeposited > 0.5)
+      //{
+      //  c2->Print(str.c_str());    
+      //}      
     }
+
+    if (totalEnergyDeposited > 0.5)
+    {
+      counter511 = counter511+1;
+      if (totalEnergyDepositedPlastic > 0.25)
+      {
+        counter511shared = counter511shared+1;
+      }
+      
+    }
+    
 
 
     
@@ -679,8 +692,8 @@ int main (int argc, char** argv)
 
 
   }
-  std::cout << counterPlastic << " out of " << nEntries << std::endl;  
-  std::cout << std::endl;
+  std::cout << counterPlastic << " plastic events out of " << nEntries << "vinteractions."<< std::endl;  
+  std::cout << counter511shared << " plastic evens out of " << counter511 << " events in the photopeak" <<std::endl;
   std::cout << "Writing output to file "<< outputFileName << std::endl;
 
 

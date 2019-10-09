@@ -154,6 +154,7 @@ int main(int argc,char** argv)
   //read foils dimensions
   G4double plasticx = config.read<double>("plasticx");
   G4double lysox = config.read<double>("lysox");
+  G4int    ncouples = config.read<double>("ncouples");
 
   //read crystal dimensions
   G4double crystalx = config.read<double>("crystalx");
@@ -417,6 +418,7 @@ int main(int argc,char** argv)
   //set the parameters of detector
   ((g4matrixDetectorConstruction*)detector)->SetCrystalDimensions(crystalx,crystaly,crystalz);
   ((g4matrixDetectorConstruction*)detector)->SetFoilsDimensions(plasticx,lysox);
+  ((g4matrixDetectorConstruction*)detector)->SetCouplesNumber(ncouples);
   ((g4matrixDetectorConstruction*)detector)->SetNumberOfCrystals(ncrystalx,ncrystaly);
   ((g4matrixDetectorConstruction*)detector)->SetThinAirThickness(esrThickness);
   ((g4matrixDetectorConstruction*)detector)->SetLateralEsr(lateralEsr);

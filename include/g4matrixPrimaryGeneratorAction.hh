@@ -84,6 +84,7 @@ private:
   G4double crystaly;
   G4double plasticx;
   G4double lysox;
+  G4int ncouples;
   G4int ncrystalx;
   G4int ncrystaly;
   G4bool backgroudSimulation;

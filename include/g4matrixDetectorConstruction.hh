@@ -54,6 +54,8 @@ public:
   virtual G4VPhysicalVolume* Construct();
 
   void SetFoilsDimensions(G4double x_plastic, G4double x_lyso) { fPlastic_x = x_plastic *mm ; fLYSO_x = x_lyso *mm ; };
+  void SetCouplesNumber(G4int number_of_couples) { nCouples = number_of_couples; };
+  
   void SetCrystalDimensions(G4double x, G4double y, G4double z) { fCrystal_x = x *mm ; fCrystal_y = y*mm ; fCrystal_z =z*mm; };
   void SetNumberOfCrystals(G4int nx, G4int ny) {nCrystalsX = nx; nCrystalsY = ny;};
   void SetThinAirThickness(G4double x) { airThinThickness = x*mm; };
@@ -131,6 +133,7 @@ public:
 private:
   G4double fPlastic_x;				//x dimensions of plastic 
   G4double fLYSO_x;				    //x dimensions of LYSO
+  G4int    nCouples; //number of Plastic/Crystal couples
 
   G4double fCrystal_x;				//x dimensions of crystals
   G4double fCrystal_y;				//y dimensions of crystals
