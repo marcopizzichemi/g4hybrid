@@ -71,6 +71,7 @@ g4matrixStackingAction::ClassifyNewTrack(const G4Track * aTrack)
       }
     }
   }
+
   //kill secondary neutrino
   if (aTrack->GetDefinition() == G4NeutrinoE::NeutrinoE()) return fKill;
   // else return fUrgent;
@@ -84,7 +85,16 @@ g4matrixStackingAction::ClassifyNewTrack(const G4Track * aTrack)
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
         fCerenkovCounter++;
     }
+
+    if ((CreateTree::Instance()->totalEnergyDeposited)<0.5 )
+    {
+      return fWaiting;
+    }
+    
   }
+
+
+
   return fUrgent;
 }
 

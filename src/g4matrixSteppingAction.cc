@@ -128,8 +128,10 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
 
   //getting information from the particles
   //for opticalphoton, we want to know where they stopped
+
   if (ParticleName == "opticalphoton") //if it's an opticalphoton
   {
+    std::cout << "evento interessante" << std::endl;
     //to avoid exitFound to be propagated to next optical photon, which would happen if in this photon we previously found an exit but then the photon dies, leaving the variable exitFound = true in CreateTree, we set it back to false if the photon is not alive after this step.
     if(track->GetTrackStatus() != 0)
     {
@@ -437,30 +439,30 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
   }
   // G4cout << "Step end " << G4endl;
   if (ParticleName == "opticalphoton") return;
-  const std::vector<const G4Track*>* secondaries =
-  step->GetSecondaryInCurrentStep();
-  if (secondaries->size()>0) {
-    for(unsigned int i=0; i<secondaries->size(); ++i) {
-      if (secondaries->at(i)->GetParentID()>0) {
-        if(secondaries->at(i)->GetDynamicParticle()->GetParticleDefinition()
-          == G4OpticalPhoton::OpticalPhotonDefinition()){
-          if (secondaries->at(i)->GetCreatorProcess()->GetProcessName()
-            == "Scintillation")
+  const std::vector<const G4Track*>* secondaries = step->GetSecondaryInCurrentStep();
+  if (secondaries->size()>0) 
+  {
+    for(unsigned int i=0; i<secondaries->size(); ++i) 
+    {
+      if (secondaries->at(i)->GetParentID()>0) 
+      {
+        if(secondaries->at(i)->GetDynamicParticle()->GetParticleDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
+        {
+          if (secondaries->at(i)->GetCreatorProcess()->GetProcessName() == "Scintillation")
           {
             CreateTree::Instance()->NumOptPhotons++;
             fScintillationCounter++;
           }
-          if (secondaries->at(i)->GetCreatorProcess()->GetProcessName()
-            == "Cerenkov")
+          
+          if (secondaries->at(i)->GetCreatorProcess()->GetProcessName() == "Cerenkov")
           {
             fCerenkovCounter++;
             CreateTree::Instance()->NumCherenkovPhotons++;
           }
-          }
+        }
       }
     }
   }
-
 
 }
 

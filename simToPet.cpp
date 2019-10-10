@@ -438,6 +438,8 @@ int main (int argc, char** argv)
   int counter511shared  = 0;
   for(int iEvent = 0; iEvent < nEntries ; iEvent++)
   {
+    std::cout << "a" << std::endl;
+
     tree->GetEvent(iEvent);
 
     ExtendedTimeTag = 1e-9;
@@ -445,12 +447,16 @@ int main (int argc, char** argv)
 
     NumbOfInteractions = 0;
     CrystalsHit = 0;
+    std::cout << photons->size() << std::endl;
 
     // sort the optical photons in time
     std::sort(photons->begin(), photons->end(), compare_by_GlobalTime );
+    std::cout << "c" << std::endl;
 
     for(int iPhot = 0; iPhot < photons->size(); iPhot++) // run on all opticals
     {
+      std::cout << iPhot << std::endl;
+
       // find which sipm was hit
       for(int iSipm = 0; iSipm < numOfCh ; iSipm++)
       {
@@ -531,6 +537,8 @@ int main (int argc, char** argv)
 
     for(int i = 0; i < numOfCh ; i++)
     {
+      std::cout << i << std::endl;
+
       // fill the charge vector
       charge[i] = (UShort_t) sipm[i].counts;
       // calculate the sipm timestamp from average of first N timestamps
@@ -690,9 +698,10 @@ int main (int argc, char** argv)
       //std::cout << counter << std::endl;
     }
 
+    std::cout << iEvent << std::endl;
 
   }
-  std::cout << counterPlastic << " plastic events out of " << nEntries << "vinteractions."<< std::endl;  
+  std::cout << counterPlastic << " plastic events out of " << nEntries << " vinteractions."<< std::endl;  
   std::cout << counter511shared << " plastic evens out of " << counter511 << " events in the photopeak" <<std::endl;
   std::cout << "Writing output to file "<< outputFileName << std::endl;
 

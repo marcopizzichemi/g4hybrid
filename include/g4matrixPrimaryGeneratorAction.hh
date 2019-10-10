@@ -34,6 +34,8 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 #include "ConfigFile.h"
+#include "CreateTree.hh"
+
 
 class G4ParticleGun;
 class G4Event;
