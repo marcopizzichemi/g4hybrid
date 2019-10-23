@@ -131,7 +131,7 @@ void g4matrixSteppingAction::UserSteppingAction(const G4Step* step)
 
   if (ParticleName == "opticalphoton") //if it's an opticalphoton
   {
-    std::cout << "evento interessante" << std::endl;
+    //std::cout << "evento interessante" << std::endl;
     //to avoid exitFound to be propagated to next optical photon, which would happen if in this photon we previously found an exit but then the photon dies, leaving the variable exitFound = true in CreateTree, we set it back to false if the photon is not alive after this step.
     if(track->GetTrackStatus() != 0)
     {

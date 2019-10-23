@@ -1,5 +1,5 @@
 // Loader.C
-#include "../g4hybrid/include/struct.hh"
+#include "../code/include/struct.hh"
 #include <vector>
 
 #ifdef __MAKECINT__

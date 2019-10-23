@@ -35,6 +35,22 @@
 #include "G4ParticleTypes.hh"
 #include "G4Track.hh"
 #include "G4ios.hh"
+#include "CreateTree.hh"
+
+
+
+
+#include "G4SDManager.hh"
+#include "G4RunManager.hh"
+#include "G4Event.hh"
+#include "G4HCofThisEvent.hh"
+#include "G4Track.hh"
+#include "G4TrackStatus.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4ParticleTypes.hh"
+#include "G4ios.hh"
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -71,30 +87,27 @@ g4matrixStackingAction::ClassifyNewTrack(const G4Track * aTrack)
       }
     }
   }
-
   //kill secondary neutrino
   if (aTrack->GetDefinition() == G4NeutrinoE::NeutrinoE()) return fKill;
   // else return fUrgent;
 
   if(aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
-  { // particle is optical photon
+  { 
+    // particle is secondary
     if(aTrack->GetParentID()>0)
-    { // particle is secondary
+    { 
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
         fScintillationCounter++;
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
         fCerenkovCounter++;
     }
 
-    if ((CreateTree::Instance()->totalEnergyDeposited)<0.5 )
+    if (CreateTree::Instance()->totalEnergyDeposited < 0.5)
     {
       return fWaiting;
     }
     
   }
-
-
-
   return fUrgent;
 }
 
@@ -106,6 +119,16 @@ void g4matrixStackingAction::NewStage()
   << fScintillationCounter << G4endl;
   G4cout << "Number of Cerenkov photons produced in this event : "
   << fCerenkovCounter << G4endl;
+
+  //if (CreateTree::Instance()->totalEnergyDeposited < 0.5)
+  //{
+  //  //G4UImanager * UImanager = G4UImanager::GetUIpointer();
+  //  //UImanager->ApplyCommand("/event/abort");
+  //  
+  //  stackManager->clear();
+  //  return;
+  //}
+  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

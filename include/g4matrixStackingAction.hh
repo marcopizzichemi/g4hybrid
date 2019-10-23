@@ -33,6 +33,13 @@
 #include "globals.hh"
 #include "G4UserStackingAction.hh"
 
+
+#include "G4ThreeVector.hh"
+
+class G4Track;
+
+
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class g4matrixStackingAction : public G4UserStackingAction
