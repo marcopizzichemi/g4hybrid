@@ -21,9 +21,11 @@
 #include "TF1.h"
 #include "TRandom3.h"
 #include <getopt.h>
+#include<bits/stdc++.h> 
 
 
-#include "../g4hybrid/struct.hh"
+
+#include "../code/struct.hh"
 
 // bool compareByTime(const enDep &a,const enDep  &b)
 // {
@@ -44,6 +46,28 @@ bool compare_by_GlobalTime(const optPhot a, const optPhot b)
 {
   return a.GlobalTime < b.GlobalTime;
 }
+
+//function 
+UShort_t findMax(UShort_t arr[]) 
+{ 
+    UShort_t mx = INT_MIN; 
+    UShort_t ID;
+    for (int i = 0; i < 16; i++) 
+    { 
+        UShort_t temp = arr[i];
+        //std::cout<<temp<<std::endl;
+        if (temp>mx)
+        {
+          mx = std::max(mx, temp);
+          ID = i;
+        }
+         
+    } 
+    return ID; 
+} 
+  
+
+
 
 void usage()
 {
@@ -427,6 +451,10 @@ int main (int argc, char** argv)
   //             << std::endl;
   // }
 
+
+  TCanvas *c2 = new TCanvas("c2","c2");
+
+  TH2F *w_vs_z = new TH2F("w_vs_z","w_vs_z", 100, 0., 1., 100, -2, 2.);
   //----------------------------------------//
   //             LOOP ON EVENTS             //
   //----------------------------------------//
@@ -438,8 +466,6 @@ int main (int argc, char** argv)
   int counter511shared  = 0;
   for(int iEvent = 0; iEvent < nEntries ; iEvent++)
   {
-    std::cout << "a" << std::endl;
-
     tree->GetEvent(iEvent);
 
     ExtendedTimeTag = 1e-9;
@@ -447,15 +473,16 @@ int main (int argc, char** argv)
 
     NumbOfInteractions = 0;
     CrystalsHit = 0;
-    std::cout << photons->size() << std::endl;
+    //std::cout << photons->size() << std::endl;
 
     // sort the optical photons in time
     std::sort(photons->begin(), photons->end(), compare_by_GlobalTime );
-    std::cout << "c" << std::endl;
+    //std::cout << "c" << std::endl;
 
-    for(int iPhot = 0; iPhot < photons->size(); iPhot++) // run on all opticals
+    // run on all opticals
+    for(int iPhot = 0; iPhot < photons->size(); iPhot++) 
     {
-      std::cout << iPhot << std::endl;
+      //std::cout << iPhot << std::endl;
 
       // find which sipm was hit
       for(int iSipm = 0; iSipm < numOfCh ; iSipm++)
@@ -530,29 +557,32 @@ int main (int argc, char** argv)
         }
       }
     }
+    // run on all opticals just finished
+
 
     TH1F* h_sum = new TH1F("h_sum", "sum_signal", 500, 0.0, 200);
 
     // calculate the global sipm parameters
-
     for(int i = 0; i < numOfCh ; i++)
     {
-      std::cout << i << std::endl;
-
       // fill the charge vector
       charge[i] = (UShort_t) sipm[i].counts;
+
       // calculate the sipm timestamp from average of first N timestamps
       sipm[i].timestamp = 0.0;
       int effectiveN = numb_of_phot_for_time_average;
+      
       if(numb_of_phot_for_time_average > sipm[i].listOfTimestamps.size())
         effectiveN = sipm[i].listOfTimestamps.size();
+      
       for(int j = 0 ; j < effectiveN; j++)
       {
         sipm[i].timestamp +=  (Float_t) ((gRandom->Gaus(sipm[i].listOfTimestamps[j],sigmaSPTR) / effectiveN)*1e-9); // default smearing at 0.087, and convert to seconds
       }
-      timestamp[i] = (Float_t) sipm[i].timestamp;
-      //calculate the current in the Sipm
       
+      timestamp[i] = (Float_t) sipm[i].timestamp;
+
+      //calculate the current in the Sipm 
       float current_values[24] = {0,0.8987406715,0.8186935828,0.7408179941,0.6703200447,0.6065306597,0.9417645336,0.4965853038,0.4493289641,0.4065696597,0.3678794412,0.3328710837,0.8869204367,0.272531793,0.2465969639,0.2231301601,0.201896518,0.1826835241,0.8352702114,0.1495686192,0.1353352832,0.1224564283,0.1108031584,0.1002588437};
 
       TH1F* h_current = new TH1F("h1", "h1 title", 500, 0.0, 200);
@@ -568,12 +598,14 @@ int main (int argc, char** argv)
         }
       }
 
+      //plot of the pulse
       TCanvas *c1 = new TCanvas("c1","c1");
       h_current->Draw("hist p");
       std::string str = std::to_string(iEvent);
       str = str + "ch" + std::to_string(i) +".pdf";
       str.append(".pdf");
       //std::cout<<iEvent<<std::endl;
+
       if ((totalEnergyDepositedPlastic > 0.25) && (totalEnergyDeposited > 0.5))
       {
         //std::cout<< totalEnergyDepositedPlastic<<std::endl;
@@ -590,12 +622,20 @@ int main (int argc, char** argv)
 
       //if(iEvent==10 && i==1)
 
-      
     }
-    TCanvas *c2 = new TCanvas("c2","c2");
-    h_sum->Draw("hist p");
+    // calculation of the global sipm parameters just finished
+
+
+
+
+
+
+    //TCanvas *c2 = new TCanvas("c2","c2");
+    //h_sum->Draw("hist p");
     std::string str = std::to_string(iEvent);
     str.append(".pdf");
+
+    //count the number of plastic events
     if (totalEnergyDepositedPlastic > 0.1)
     {
       //std::cout << "one out of "<<nEntries<< " events"<<std::endl;
@@ -606,6 +646,7 @@ int main (int argc, char** argv)
       //}      
     }
 
+    //count the number of SHARED plastic events
     if (totalEnergyDeposited > 0.5)
     {
       counter511 = counter511+1;
@@ -624,7 +665,7 @@ int main (int argc, char** argv)
     //std::cout << "integral:\t"    << h_current->Integral(0,10000)       << std::endl;
     //std::cout << h_current->Integral(0,10000) <<" \t"  << h_current->GetBinContent(bin_max)  << std::endl;
     delete h_sum;
-    delete c2;
+    
 
 
 
@@ -683,9 +724,30 @@ int main (int argc, char** argv)
     TotalEnergyDeposited_out = totalEnergyDeposited;
     CrystalsHit = crystals.size();
 
+    float w = 0;
+    //calculate w
+    {
+      //get the trigger ch
+      int trigger_ch_ID = findMax(charge); 
+
+      //get the current in that ch
+      float trigger_ch_current = charge[trigger_ch_ID];
+
+      //sum the current in every ch
+      float all_other_ch_current = 0; 
+      for (size_t i = 0; i < 16; i++)
+      {
+        all_other_ch_current = all_other_ch_current + charge[i];
+      }
+      
+      //compute w
+      w = (float) trigger_ch_current/all_other_ch_current;
+    }  
+
     if(NumbOfInteractions > 0) // discard events with no energy deposition (they would never trigger the detectors anyway..)
     {
       t1->Fill();
+      w_vs_z->Fill(w,RealZ);
     }
 
     counter++;
@@ -693,14 +755,17 @@ int main (int argc, char** argv)
     int perc = ((100*counter)/nEntries); //should strictly have not decimal part, written like this...
     if( (perc % 10) == 0 )
     {
-      //std::cout << "\r";
-      //std::cout << perc << "% done... ";
+      std::cout << "\r";
+      std::cout << perc << "% done... ";
       //std::cout << counter << std::endl;
     }
 
-    std::cout << iEvent << std::endl;
+    //std::cout << iEvent << std::endl;
 
   }
+  w_vs_z->Draw();
+  c2->Print("w_vs_z");
+  delete c2;
   std::cout << counterPlastic << " plastic events out of " << nEntries << " vinteractions."<< std::endl;  
   std::cout << counter511shared << " plastic evens out of " << counter511 << " events in the photopeak" <<std::endl;
   std::cout << "Writing output to file "<< outputFileName << std::endl;
@@ -709,7 +774,7 @@ int main (int argc, char** argv)
 
   TFile* fOut = new TFile(outputFileName.c_str(),"recreate");
   t1->Write();
-
+  w_vs_z->Write();
   fOut->Close();
 
   //free memory
