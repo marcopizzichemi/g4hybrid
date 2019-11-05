@@ -306,7 +306,7 @@ int main (int argc, char** argv)
   timestamp = new Float_t[numOfCh];
   UShort_t taggingCharge = 1;
   Float_t taggingTimeStamp = 0;
-  Float_t RealX,RealY,RealZ;
+  Float_t RealX,RealY,RealZ,RealZ_old;
   Short_t CrystalsHit;
   Short_t NumbOfInteractions;
   Float_t TotalEnergyDeposited_out;
@@ -315,6 +315,7 @@ int main (int argc, char** argv)
 
   t1->Branch("ExtendedTimeTag",&ExtendedTimeTag,"ExtendedTimeTag/l"); 	//absolute time tag of the event
   t1->Branch("DeltaTimeTag",&DeltaTimeTag,"DeltaTimeTag/l"); 			//delta time from previous event
+  //t1->Branch("")
   //branches of the channels data
   std::stringstream snames,stypes;
   for (int i = 0 ; i < numOfCh ; i++)
@@ -452,9 +453,11 @@ int main (int argc, char** argv)
   // }
 
 
-  TCanvas *c2 = new TCanvas("c2","c2");
 
-  TH2F *w_vs_z = new TH2F("w_vs_z","w_vs_z", 100, 0., 1., 100, -2, 2.);
+  TH2F *w_vs_z = new TH2F("w_vs_z","w_vs_z", 100, -100., 100., 100, -1000, 1000.);
+  TH1F *h_RealZ = new TH1F("h_RealZ", "h_RealZ", 100, -100., 100.);
+  TH2F *w_vs_z_old = new TH2F("w_vs_z_old","w_vs_z_old", 100, -100., 100., 100, -100., 100.);
+  TH1F *h_RealZ_old = new TH1F("h_RealZ_old", "h_RealZ_old", 100, -100., 100.);
   //----------------------------------------//
   //             LOOP ON EVENTS             //
   //----------------------------------------//
@@ -695,12 +698,13 @@ int main (int argc, char** argv)
 
 
 
-    RealX = RealY = RealZ = 0;
+    RealX = RealY = RealZ = RealZ_old = 0;
 
     NumbOfInteractions = energyDeposition->size();
 
     std::vector<int> crystals;
-    for(int eEvent = 0; eEvent < energyDeposition->size(); eEvent++)// run on energy depositions for this gamma event
+    // run on energy depositions for this gamma event
+    for(int eEvent = 0; eEvent < energyDeposition->size(); eEvent++)
     {
       // -- counting the crystals where energy was deposited in this event
       //read the crystal where energy was deposited
@@ -719,35 +723,47 @@ int main (int argc, char** argv)
 	      // RealX += (px[i]->at(j) * pEdep[i]->at(j))/totalEnergyDeposited;
       RealX += (energyDeposition->at(eEvent).DepositionX * energyDeposition->at(eEvent).EnergyDeposited)/totalEnergyDeposited;
       RealY += (energyDeposition->at(eEvent).DepositionY * energyDeposition->at(eEvent).EnergyDeposited)/totalEnergyDeposited;
-      RealZ += (energyDeposition->at(eEvent).DepositionZ * energyDeposition->at(eEvent).EnergyDeposited)/totalEnergyDeposited;
+      RealZ += ((energyDeposition->at(eEvent).DepositionZ + 7.5) * energyDeposition->at(eEvent).EnergyDeposited)/totalEnergyDeposited;
+      RealZ_old += (energyDeposition->at(eEvent).DepositionZ * energyDeposition->at(eEvent).EnergyDeposited)/totalEnergyDeposited;
     }
+    //std::cout<<RealZ<<std::endl;
+    
+    
     TotalEnergyDeposited_out = totalEnergyDeposited;
     CrystalsHit = crystals.size();
 
+    //####### W #######
     float w = 0;
-    //calculate w
+    float all_other_ch_current = 0; 
+
+    //get the trigger ch
+    int trigger_ch_ID = findMax(charge); 
+
+    //get the current in that ch
+    float trigger_ch_current = charge[trigger_ch_ID];
+
+    //sum the current in every ch
+    for (size_t i = 0; i < 16; i++)
     {
-      //get the trigger ch
-      int trigger_ch_ID = findMax(charge); 
+      all_other_ch_current = all_other_ch_current + charge[i];
+    }
+    w = (float) trigger_ch_current/all_other_ch_current;
+  
 
-      //get the current in that ch
-      float trigger_ch_current = charge[trigger_ch_ID];
+    //if(NumbOfInteractions > 0) // discard events with no energy deposition (they would never trigger the detectors anyway..)
+    {
+      //if (RealZ > 0 && RealZ < 15 && w>0 && w<1)
+      //{
 
-      //sum the current in every ch
-      float all_other_ch_current = 0; 
-      for (size_t i = 0; i < 16; i++)
-      {
-        all_other_ch_current = all_other_ch_current + charge[i];
-      }
+        w_vs_z_old->Fill(RealZ_old,w);
+        h_RealZ_old->Fill(RealZ_old);
+        w_vs_z->Fill(RealZ,w);
+        h_RealZ->Fill(RealZ);
+      //}
       
-      //compute w
-      w = (float) trigger_ch_current/all_other_ch_current;
-    }  
-
-    if(NumbOfInteractions > 0) // discard events with no energy deposition (they would never trigger the detectors anyway..)
-    {
       t1->Fill();
-      w_vs_z->Fill(w,RealZ);
+
+      
     }
 
     counter++;
@@ -763,9 +779,16 @@ int main (int argc, char** argv)
     //std::cout << iEvent << std::endl;
 
   }
-  w_vs_z->Draw();
-  c2->Print("w_vs_z");
-  delete c2;
+  //TCanvas *c2 = new TCanvas("c2","c2");
+  //w_vs_z->Draw();
+  //c2->Print("w_vs_z");
+  //delete c2;
+  //
+  //TCanvas *c3 = new TCanvas("c3","c3");
+  //h_RealZ->Draw();
+  //c3->Print("realz");
+  //delete c3;
+  
   std::cout << counterPlastic << " plastic events out of " << nEntries << " vinteractions."<< std::endl;  
   std::cout << counter511shared << " plastic evens out of " << counter511 << " events in the photopeak" <<std::endl;
   std::cout << "Writing output to file "<< outputFileName << std::endl;
@@ -775,6 +798,9 @@ int main (int argc, char** argv)
   TFile* fOut = new TFile(outputFileName.c_str(),"recreate");
   t1->Write();
   w_vs_z->Write();
+  h_RealZ->Write();
+  w_vs_z_old->Write();
+  h_RealZ_old->Write();
   fOut->Close();
 
   //free memory
